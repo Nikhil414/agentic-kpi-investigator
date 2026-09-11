@@ -22,6 +22,10 @@ Claude API explanation layer  (no DB access, approval_required on every finding)
 Power BI dashboards + human review
 ```
 
+> Power BI report (KPI Dashboard, Data Quality Investigation, Investigation
+> Review pages) was built and exercised locally against the exports below.
+> The `.pbix` file is not included in this repo.
+
 ---
 
 ## Business questions answered

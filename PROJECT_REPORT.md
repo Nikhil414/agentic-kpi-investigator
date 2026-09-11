@@ -101,6 +101,8 @@ The AI must return evidence, likely explanation, recommended human review, confi
 
 ## Power BI implementation
 
+> Built and exercised locally; the `.pbix` file is not included in this repo.
+
 The report contains:
 
 - `KPI Dashboard` — date slicer, revenue, order count, payment success, variance, status, and revenue trend.
