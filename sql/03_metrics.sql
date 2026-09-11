@@ -1,0 +1,31 @@
+CREATE OR REPLACE TABLE daily_kpis AS
+WITH order_values AS (
+  SELECT order_date, order_id, customer_id, order_amount - discount_amount net_revenue
+  FROM stg_orders WHERE status <> 'cancelled'
+), payment_rollup AS (
+  SELECT order_id, BOOL_OR(payment_status = 'success') paid_success
+  FROM stg_payments GROUP BY order_id
+)
+SELECT o.order_date, COUNT(*) order_count, ROUND(SUM(o.net_revenue), 2) net_revenue,
+       ROUND(100.0 * AVG(CASE WHEN COALESCE(p.paid_success, false) THEN 1 ELSE 0 END), 2) payment_success_rate
+FROM order_values o LEFT JOIN payment_rollup p USING (order_id)
+GROUP BY o.order_date;
+
+CREATE OR REPLACE TABLE kpi_target_comparison AS
+SELECT k.*, t.target_revenue, t.target_payment_success_rate, t.target_order_count,
+       ROUND(k.net_revenue - t.target_revenue, 2) revenue_variance,
+       CASE WHEN k.net_revenue < t.target_revenue THEN 'below_target' ELSE 'on_target' END revenue_status
+FROM daily_kpis k LEFT JOIN stg_daily_kpi_targets t ON k.order_date = t.metric_date;
+
+CREATE OR REPLACE TABLE anomalies AS
+WITH baseline AS (
+  SELECT *, AVG(net_revenue) OVER (ORDER BY order_date ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) previous_7_day_avg
+  FROM daily_kpis
+)
+SELECT order_date, net_revenue, previous_7_day_avg,
+       CASE WHEN previous_7_day_avg IS NULL THEN 'insufficient_history'
+            WHEN net_revenue < previous_7_day_avg * 0.80 THEN 'revenue_drop'
+            WHEN net_revenue > previous_7_day_avg * 1.50 THEN 'revenue_spike'
+            ELSE 'normal' END anomaly_type
+FROM baseline;
+

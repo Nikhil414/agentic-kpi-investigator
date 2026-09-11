@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# DuckDB binary
+data/processed/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+
+# VS Code
+.vscode/
+
+# Exports (generated at runtime)
+data/exports/
+
+# Power BI (large binary, optional to track)
+*.pbix

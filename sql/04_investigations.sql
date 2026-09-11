@@ -1,0 +1,17 @@
+CREATE OR REPLACE TABLE regional_revenue AS
+SELECT o.order_date, c.region, COUNT(DISTINCT o.order_id) orders,
+       ROUND(SUM(o.order_amount - o.discount_amount), 2) revenue
+FROM stg_orders o JOIN stg_customers c USING (customer_id)
+WHERE o.status <> 'cancelled'
+GROUP BY o.order_date, c.region;
+
+CREATE OR REPLACE TABLE product_revenue AS
+SELECT order_date, product_category, COUNT(DISTINCT order_id) orders,
+       ROUND(SUM(order_amount - discount_amount), 2) revenue
+FROM stg_orders WHERE status <> 'cancelled'
+GROUP BY order_date, product_category;
+
+CREATE OR REPLACE TABLE payment_summary AS
+SELECT payment_date, payment_status, COUNT(*) payments, ROUND(SUM(payment_amount), 2) amount
+FROM stg_payments GROUP BY payment_date, payment_status;
+
