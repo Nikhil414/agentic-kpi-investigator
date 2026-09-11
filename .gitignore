@@ -17,3 +17,6 @@ data/exports/
 
 # Power BI (large binary, optional to track)
 *.pbix
+
+# Stray duplicate project copy (not part of this repo)
+Agentic KPI and Data-Quality Investigator/
