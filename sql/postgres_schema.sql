@@ -74,3 +74,32 @@ SELECT 'payment_amount_mismatch', p.payment_id
 FROM finance.payments p
 JOIN finance.orders o ON o.order_id = p.order_id
 WHERE p.payment_amount <> o.order_amount - o.discount_amount;
+
+CREATE OR REPLACE VIEW finance.quality_issues_dated AS
+SELECT 'order_without_payment' AS issue_type,
+    o.order_date AS issue_date,
+    'order' AS entity_type,
+    o.order_id AS issue_key
+FROM finance.orders AS o
+LEFT JOIN finance.payments AS pay
+    ON pay.order_id = o.order_id
+WHERE pay.order_id IS NULL
+UNION ALL
+SELECT 'payment_amount_mismatch' AS issue_type,
+    pay.payment_date AS issue_date,
+    'payment' AS entity_type,
+    pay.payment_id AS issue_key
+FROM finance.payments AS pay
+JOIN finance.orders AS ord
+    ON ord.order_id = pay.order_id
+WHERE pay.payment_amount <> (ord.order_amount - ord.discount_amount);
+
+CREATE TABLE IF NOT EXISTS finance.investigation_reviews (
+    review_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    issue_key VARCHAR(20) NOT NULL,
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high')),
+    reviewer VARCHAR(100) NOT NULL,
+    decision VARCHAR(30) NOT NULL,
+    reviewer_notes TEXT,
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
