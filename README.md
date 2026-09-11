@@ -62,9 +62,14 @@ Creates `data/processed/finance.duckdb` with staging, quality, KPI, anomaly, and
 ## Run (PostgreSQL — production)
 
 ```powershell
+psql -h 127.0.0.1 -U postgres -d postgres -f sql/postgres_schema.sql
 python -m pip install "psycopg[binary]"
 python src/postgres_pipeline.py
 ```
+
+The first command creates the `finance` schema, tables, and views — required once
+per database before `postgres_pipeline.py` will run. Set `DATABASE_URL` if your
+connection details differ from the local default in `src/postgres_pipeline.py`.
 
 Upserts the four CSV inputs, records each run in `finance.pipeline_runs`, exports KPI and quality CSVs to `data/exports/`.
 
