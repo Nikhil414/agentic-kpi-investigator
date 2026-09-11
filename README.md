@@ -4,6 +4,8 @@ SQL-first finance analytics pipeline that detects KPI shortfalls and data-qualit
 
 **Stack:** DuckDB · PostgreSQL · Python · Claude API · Power BI
 
+![Project Overview](Project_image.png)
+
 ---
 
 ## Architecture
